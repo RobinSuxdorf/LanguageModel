@@ -70,27 +70,30 @@ class Tokenizer(ABC):
         """
         return ''.join(self.itos[i] for i in encoding)
 
-    def save(self, filename: str) -> None:
+    def to_pkl(self, path: str) -> None:
         """
         Saves the tokenizer's state to a binary file.
 
         Args:
-            filename (str): The name of the file to save the tokenizer's state to.
+            path (str): The path of the file to save the tokenizer's state to.
         """
-        with open(f"f{filename}.pkl", "wb") as file:
-            file.write(pickle.dumbs(self.__dict__))
+        with open(path, "wb") as file:
+            pickle.dump(self.__dict__, file)
 
-    def load(self, filename: str) -> None:
+    @classmethod
+    def read_pkl(cls, path: str):
         """
-        Loads the tokenizer's state from a binary file.
+        Reads the tokenizer's state from a binary file.
 
         Args:
-            filename (str): The name of the file to load the tokenizer's state from.
+            path (str): The path of the file to load the tokenizer's state from.
         """
         try:
-            with open(f"{filename}.pkl", "rb") as file:
-                self.__dict__ = pickle.load(file)
+            with open(path, "rb") as file:
+                tokenizer = cls.__new__(cls)
+                tokenizer.__dict__ = pickle.load(file)
+                return tokenizer
         except FileNotFoundError:
-            print(f"File '{filename}.pkl' not found.")
+            print(f"File '{path}' not found.")
         except EOFError:
-            print(f"Error while reading '{filename}.pkl'. File may be corrupted.")
+            print(f"Error while reading '{path}'. File may be corrupted.")
