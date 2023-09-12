@@ -1,9 +1,9 @@
-from tokenizer import Tokenizer
+from .tokenizer import Tokenizer
 from typing import Dict, List, Tuple
 import re
 from collections import defaultdict
 
-class BytePairEncoderTokenizer(Tokenizer):
+class BytePairEncodingTokenizer(Tokenizer):
     """
     Tokenizer using Byte Pair Encoding (BPE) algorithm.
 
@@ -16,7 +16,7 @@ class BytePairEncoderTokenizer(Tokenizer):
 
     def __init__(self, num_merges: int) -> None:
         """
-        Initialize the BytePairEncoderTokenizer.
+        Initialize the BytePairEncodingTokenizer.
 
         Args:
             num_merges (int): The number of BPE merges to perform during training.

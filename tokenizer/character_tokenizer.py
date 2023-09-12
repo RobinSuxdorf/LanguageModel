@@ -1,4 +1,4 @@
-from tokenizer import Tokenizer
+from .tokenizer import Tokenizer
 from typing import List
 
 class CharacterTokenizer(Tokenizer):
