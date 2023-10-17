@@ -1,17 +1,34 @@
 import torch
 import torch.nn as nn
 
+from tokenizer.tokenizer import Tokenizer
+
+## LanguageModel
+## predict
+## save
+## load
+
 class Encoder(nn.Module):
-    def __init__(self, vocab_size, embed_size, context_length, num_layers, num_heads, forward_expansion, dropout):
+    def __init__(
+        self, 
+        tokenizer: Tokenizer, 
+        embed_size: int, 
+        context_length: int, 
+        num_layers: int, 
+        num_heads: int, 
+        forward_expansion: int, 
+        dropout: float
+    ):
         super().__init__()
-        self.token_embedding = nn.Embedding(vocab_size, embed_size)
+        self.tokenizer = tokenizer
+        self.context_length = context_length
+
+        self.token_embedding = nn.Embedding(tokenizer.vocab_size, embed_size)
         self.position_embedding = nn.Embedding(context_length, embed_size)
 
         self.blocks = nn.Sequential(*[TransformerBlock(num_heads, embed_size, context_length, forward_expansion, dropout) for _ in range(num_layers)])
         self.layer_norm = nn.LayerNorm(embed_size)
-        self.linear_head = nn.Linear(embed_size, vocab_size)
-
-        self.context_length = context_length
+        self.linear_head = nn.Linear(embed_size, tokenizer.vocab_size)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
@@ -47,10 +64,21 @@ class Encoder(nn.Module):
             idx_next = torch.multinomial(probs, num_samples=1)
 
             idx = torch.cat((idx, idx_next), dim=1)
+
         return idx
 
+    def predict(input_text: str, max_new_tokens: int) -> str:
+        pass
+
 class TransformerBlock(nn.Module):
-    def __init__(self, num_heads, embed_size, context_length, forward_expansion, dropout):
+    def __init__(
+        self, 
+        num_heads: int, 
+        embed_size: int, 
+        context_length: int, 
+        forward_expansion: int, 
+        dropout: float
+    ):
         super().__init__()
         assert embed_size % num_heads == 0, 'embed_size not divisible by num_heads'
 
@@ -68,7 +96,7 @@ class TransformerBlock(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         attn = self.attention(x)
 
         x = self.dropout(self.layer_norm_1(attn + x))
@@ -80,7 +108,14 @@ class TransformerBlock(nn.Module):
         return x
 
 class MultiHeadAttention(nn.Module):
-    def __init__(self, num_heads, head_size, embed_size, context_length, dropout):
+    def __init__(
+        self, 
+        num_heads: int, 
+        head_size: int, 
+        embed_size: int, 
+        context_length: int, 
+        dropout: float
+    ):
         super().__init__()
         self.heads = nn.ModuleList([
             AttentionHead(head_size, embed_size, context_length, dropout) for _ in range(num_heads)
@@ -89,13 +124,19 @@ class MultiHeadAttention(nn.Module):
         self.proj = nn.Linear(head_size * num_heads, embed_size)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.dropout(self.proj(out))
         return out
 
 class AttentionHead(nn.Module):
-    def __init__(self, head_size, embed_size, context_length, dropout):
+    def __init__(
+        self, 
+        head_size: int, 
+        embed_size: int, 
+        context_length: int, 
+        dropout: float
+    ):
         super().__init__()
         self.key_proj = nn.Linear(embed_size, head_size, bias=False)
         self.query_proj = nn.Linear(embed_size, head_size, bias=False)
@@ -105,7 +146,7 @@ class AttentionHead(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x):
+    def forward(self, x: torch.tensor) -> torch.tensor:
         B, T, C = x.shape
         k = self.key_proj(x)
         q = self.query_proj(x)
