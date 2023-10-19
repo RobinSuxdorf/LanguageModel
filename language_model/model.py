@@ -1,10 +1,11 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
 
 from tokenizer.tokenizer import Tokenizer
 
 # star wars files
-# type hints // dimension 
 # save / load model
 # doc strings
 # initialization
@@ -23,7 +24,7 @@ class LanguageModel():
     ):
         self.tokenizer = tokenizer
         self.context_length = context_length
-        self.device = device
+        self._device = device
 
         self.encoder = Encoder(
             tokenizer.vocab_size,
@@ -37,7 +38,7 @@ class LanguageModel():
 
     def predict(self, input_text: str, max_new_tokens: int) -> str:
 
-        context = torch.tensor(self.tokenizer.encode(input_text), dtype=torch.long).unsqueeze(0).to(self.device)
+        context = torch.tensor(self.tokenizer.encode(input_text), dtype=torch.long).unsqueeze(0).to(self._device)
 
         for _ in range(max_new_tokens):
             idx_cond = context[:, -self.context_length:]
@@ -82,42 +83,31 @@ class Encoder(nn.Module):
         self.layer_norm = nn.LayerNorm(embed_size)
         self.linear_head = nn.Linear(embed_size, vocab_size)
 
-    def forward(self, idx, targets=None):
+    def forward(
+        self, 
+        idx: torch.tensor, # (B, T)
+        targets: Optional[torch.tensor] = None # (B, T)
+    ):
         B, T = idx.shape
 
-        token_embedding = self.token_embedding(idx)
-        position_embedding = self.position_embedding(torch.arange(T))
+        token_embedding = self.token_embedding(idx) # (B, T, es)
+        position_embedding = self.position_embedding(torch.arange(T)) # (T, es)
 
-        x = token_embedding + position_embedding
-        x = self.blocks(x)
-        x = self.layer_norm(x)
-        logits = self.linear_head(x)
+        x = token_embedding + position_embedding # (B, T, es)
+        x = self.blocks(x) # (B, T, es)
+        x = self.layer_norm(x) # (B, T, es)
+        logits = self.linear_head(x) # (B, T, vs)
 
         if targets is None:
             loss = None
         else:
             B, T, C = logits.shape
-            logits = logits.view(B * T, C)
-            targets = targets.view(B * T)
+
+            logits = logits.view(B * T, C) # (B * T, vs)
+            targets = targets.view(B * T) # (B * T)
             loss = nn.functional.cross_entropy(logits, targets)
 
         return logits, loss
-
-    def generate(self, idx, max_new_tokens):
-        for _ in range(max_new_tokens):
-            idx_cond = idx[:, -self.context_length:]
-
-            logits, loss = self(idx_cond)
-
-            logits = logits[:, -1, :]
-
-            probs = nn.functional.softmax(logits, dim=-1)
-
-            idx_next = torch.multinomial(probs, num_samples=1)
-
-            idx = torch.cat((idx, idx_next), dim=1)
-
-        return idx
 
 class TransformerBlock(nn.Module):
     def __init__(
@@ -145,14 +135,17 @@ class TransformerBlock(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        attn = self.attention(x)
+    def forward(
+        self, 
+        x: torch.tensor # (B, T, es)
+    ) -> torch.tensor:
+        attn = self.attention(x) # (B, T, es)
 
-        x = self.dropout(self.layer_norm_1(attn + x))
+        x = self.dropout(self.layer_norm_1(attn + x)) # (B, T, es)
 
-        forward = self.feed_forward(x)
+        forward = self.feed_forward(x) # (B, T, es)
 
-        x = self.dropout(self.layer_norm_2(forward + x))
+        x = self.dropout(self.layer_norm_2(forward + x)) # (B, T, es)
 
         return x
 
@@ -173,9 +166,12 @@ class MultiHeadAttention(nn.Module):
         self.proj = nn.Linear(head_size * num_heads, embed_size)
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
-        out = torch.cat([h(x) for h in self.heads], dim=-1)
-        out = self.dropout(self.proj(out))
+    def forward(
+        self, 
+        x: torch.tensor # (B, T, es)
+    ) -> torch.tensor:
+        out = torch.cat([h(x) for h in self.heads], dim=-1) # (B, T, es)
+        out = self.dropout(self.proj(out)) # (B, T, es)
         return out
 
 class AttentionHead(nn.Module):
@@ -195,17 +191,20 @@ class AttentionHead(nn.Module):
 
         self.dropout = nn.Dropout(dropout)
 
-    def forward(self, x: torch.tensor) -> torch.tensor:
+    def forward(
+        self, 
+        x: torch.tensor # (B, T, es)
+    ) -> torch.tensor:
         B, T, C = x.shape
-        k = self.key_proj(x)
-        q = self.query_proj(x)
-        v = self.value_proj(x)
 
-        wei = q @ k.transpose(-2, -1) * k.shape[-1] ** -0.5
-        wei = wei.masked_fill(self.tril[:T,:T] == 0, float('-inf'))
-        wei = nn.functional.softmax(wei, dim=-1)
+        k = self.key_proj(x) # (B, T, hs)
+        q = self.query_proj(x) # (B, T, hs)
+        v = self.value_proj(x) # (B, T, hs)
+
+        wei = q @ k.transpose(-2, -1) * k.shape[-1] ** -0.5 # (B, T, hs) @ (B, hs, T) -> (B, T, T)
+        wei = wei.masked_fill(self.tril[:T,:T] == 0, float('-inf')) # (B, T, T)
+        wei = nn.functional.softmax(wei, dim=-1) # (B, T, T)
         wei = self.dropout(wei)
-
-        out = wei @ v
+        out = wei @ v # (B, T, T) @ (B, T, hs) -> (B, T, hs)
 
         return out
