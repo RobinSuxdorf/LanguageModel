@@ -3,15 +3,68 @@ import torch.nn as nn
 
 from tokenizer.tokenizer import Tokenizer
 
-## LanguageModel
-## predict
-## save
-## load
+# star wars files
+# type hints // dimension 
+# save / load model
+# doc strings
+# initialization
+
+class LanguageModel():
+    def __init__(
+        self,
+        tokenizer: Tokenizer,
+        embed_size: int,
+        context_length: int,
+        num_layers: int,
+        num_heads: int,
+        forward_expansion: int,
+        dropout: float,
+        device: str = 'cpu'
+    ):
+        self.tokenizer = tokenizer
+        self.context_length = context_length
+        self.device = device
+
+        self.encoder = Encoder(
+            tokenizer.vocab_size,
+            embed_size,
+            context_length,
+            num_layers,
+            num_heads,
+            forward_expansion,
+            dropout
+        ).to(device)
+
+    def predict(self, input_text: str, max_new_tokens: int) -> str:
+
+        context = torch.tensor(self.tokenizer.encode(input_text), dtype=torch.long).unsqueeze(0).to(self.device)
+
+        for _ in range(max_new_tokens):
+            idx_cond = context[:, -self.context_length:]
+
+            logits, _ = self.encoder(idx_cond)
+
+            logits = logits[:, -1, :]
+
+            probs = nn.functional.softmax(logits, dim=-1)
+
+            idx_next = torch.multinomial(probs, num_samples=1)
+
+            context = torch.cat((context, idx_next), dim=1)
+
+        output = self.tokenizer.decode(context[0].tolist())
+        return output
+
+    def save(self):
+        pass
+
+    def load(self):
+        pass
 
 class Encoder(nn.Module):
     def __init__(
         self, 
-        tokenizer: Tokenizer, 
+        vocab_size: int, 
         embed_size: int, 
         context_length: int, 
         num_layers: int, 
@@ -20,15 +73,14 @@ class Encoder(nn.Module):
         dropout: float
     ):
         super().__init__()
-        self.tokenizer = tokenizer
         self.context_length = context_length
 
-        self.token_embedding = nn.Embedding(tokenizer.vocab_size, embed_size)
+        self.token_embedding = nn.Embedding(vocab_size, embed_size)
         self.position_embedding = nn.Embedding(context_length, embed_size)
 
         self.blocks = nn.Sequential(*[TransformerBlock(num_heads, embed_size, context_length, forward_expansion, dropout) for _ in range(num_layers)])
         self.layer_norm = nn.LayerNorm(embed_size)
-        self.linear_head = nn.Linear(embed_size, tokenizer.vocab_size)
+        self.linear_head = nn.Linear(embed_size, vocab_size)
 
     def forward(self, idx, targets=None):
         B, T = idx.shape
@@ -66,9 +118,6 @@ class Encoder(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
 
         return idx
-
-    def predict(input_text: str, max_new_tokens: int) -> str:
-        pass
 
 class TransformerBlock(nn.Module):
     def __init__(
