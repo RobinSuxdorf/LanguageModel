@@ -1,5 +1,7 @@
 from typing import Optional
 
+import pickle
+
 import torch
 import torch.nn as nn
 
@@ -8,7 +10,6 @@ from tokenizer.tokenizer import Tokenizer
 # star wars files
 # save / load model
 # doc strings
-# initialization
 
 class LanguageModel():
     def __init__(
@@ -56,11 +57,23 @@ class LanguageModel():
         output = self.tokenizer.decode(context[0].tolist())
         return output
 
-    def save(self):
-        pass
+    def save(self, path: str):
+        with open(path, "wb") as file:
+            pickle.dump(self.__dict__, file)
+            # torch.save(self.encoder.state_dict(), './model_weights.pt')
 
-    def load(self):
-        pass
+    @classmethod
+    def load(cls, path: str):
+        try:
+            with open(path, "rb") as file:
+                model = cls.__new__(cls)
+                model.__dict__ = pickle.load(file)
+                # model.encoder.load_state_dict(torch.load('./model_weights.pt'))
+                return model
+        except FileNotFoundError:
+            print(f"File '{path}' not found.")
+        except EOFError:
+            print(f"Error while reading '{path}'. File may be corrupted.")
 
 class Encoder(nn.Module):
     def __init__(
