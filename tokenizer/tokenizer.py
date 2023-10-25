@@ -16,7 +16,7 @@ class Tokenizer(ABC):
 
     def __init__(self):
         """
-        Initialize a Tokenizer instance with a basse vocabulary.
+        Initialize a Tokenizer instance with a base vocabulary.
         """
         self.stoi: Dict[str, int] = {char: i for i, char in enumerate(list(BASE_VOCAB))}
         self.itos: Dict[int, str] = {i: char for i, char in enumerate(list(BASE_VOCAB))}
