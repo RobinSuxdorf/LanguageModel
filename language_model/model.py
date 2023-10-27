@@ -56,7 +56,8 @@ class LanguageModel():
             num_layers,
             num_heads,
             forward_expansion,
-            dropout
+            dropout,
+            device = device
         ).to(device)
 
     def predict(self, input_text: str, max_new_tokens: int) -> str:
@@ -128,10 +129,12 @@ class Encoder(nn.Module):
         num_layers: int, 
         num_heads: int, 
         forward_expansion: int, 
-        dropout: float
+        dropout: float,
+        device: str
     ):
         super().__init__()
         self.context_length = context_length
+        self._device = device
 
         self.token_embedding = nn.Embedding(vocab_size, embed_size)
         self.position_embedding = nn.Embedding(context_length, embed_size)
@@ -158,7 +161,7 @@ class Encoder(nn.Module):
         B, T = idx.shape
 
         token_embedding = self.token_embedding(idx) # (B, T, es)
-        position_embedding = self.position_embedding(torch.arange(T)) # (T, es)
+        position_embedding = self.position_embedding(torch.arange(T, device=self._device)) # (T, es)
 
         x = token_embedding + position_embedding # (B, T, es)
         x = self.blocks(x) # (B, T, es)
