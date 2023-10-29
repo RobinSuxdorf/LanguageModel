@@ -30,7 +30,7 @@ class LanguageModel():
         num_heads: int,
         forward_expansion: int,
         dropout: float,
-        device: str = 'cpu'
+        device: str
     ):
         """
         Initialize the language model.
