@@ -3,8 +3,8 @@ import pickle
 import torch
 import torch.nn as nn
 
-from tokenizer.tokenizer import Tokenizer
-from .model import Encoder
+from tokenizer import tokenizer
+from language_model import model
 
 class LanguageModel():
     """
@@ -22,7 +22,7 @@ class LanguageModel():
     """
     def __init__(
         self,
-        tokenizer: Tokenizer,
+        tokenizer: tokenizer.Tokenizer,
         embed_size: int,
         context_length: int,
         num_layers: int,
@@ -48,7 +48,7 @@ class LanguageModel():
         self.context_length = context_length
         self._device = device
 
-        self.encoder = Encoder(
+        self.encoder = model.Encoder(
             tokenizer.vocab_size,
             embed_size,
             context_length,
@@ -98,7 +98,6 @@ class LanguageModel():
         """
         with open(path, "wb") as file:
             pickle.dump(self.__dict__, file)
-            # torch.save(self.encoder.state_dict(), './model_weights.pt')
 
     @classmethod
     def load(cls, path: str):
@@ -112,7 +111,7 @@ class LanguageModel():
             with open(path, "rb") as file:
                 model = cls.__new__(cls)
                 model.__dict__ = pickle.load(file)
-                # model.encoder.load_state_dict(torch.load('./model_weights.pt'))
+
                 return model
         except FileNotFoundError:
             print(f"File '{path}' not found.")

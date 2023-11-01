@@ -1,9 +1,9 @@
-from .tokenizer import Tokenizer
+import tokenizer
 from typing import Dict, List, Tuple
 import re
 from collections import defaultdict
 
-class BytePairEncodingTokenizer(Tokenizer):
+class BytePairEncodingTokenizer(tokenizer.Tokenizer):
     """
     Tokenizer using Byte Pair Encoding (BPE) algorithm.
 

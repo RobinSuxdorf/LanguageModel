@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import torch
 
-from .generation import LanguageModel
+from language_model import generation
 
 @dataclass
 class TrainArgs:
@@ -24,7 +24,7 @@ class ModelTrainer:
         train_data (torch.tensor): The training dataset.
         test_data (torch.tensor): The test dataset.
     """
-    def __init__(self, args: TrainArgs, model: LanguageModel, train_data: torch.tensor, test_data: torch.tensor):
+    def __init__(self, args: TrainArgs, model: generation.LanguageModel, train_data: torch.tensor, test_data: torch.tensor):
         self._max_iters = args.max_iters
         self._eval_iters = args.eval_iters
         self._eval_interval = args.eval_interval

@@ -1,7 +1,7 @@
-from .tokenizer import Tokenizer
+import tokenizer
 from typing import List
 
-class CharacterTokenizer(Tokenizer):
+class CharacterTokenizer(tokenizer.Tokenizer):
     """
     Tokenizer that tokenizes input text into individual characters.
     """
