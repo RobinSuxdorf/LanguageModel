@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import torch
 
-from .model import LanguageModel
+from .generation import LanguageModel
 
 @dataclass
 class TrainArgs:
