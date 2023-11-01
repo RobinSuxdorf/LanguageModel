@@ -15,6 +15,15 @@ class TrainArgs:
     batch_size: int = 64
 
 class ModelTrainer:
+    """
+    Class for training language model on given datasets.
+
+    Args:
+        args (TrainArgs): The training hyperparameters.
+        model (LanguageModel): The language model which should be trained.
+        train_data (torch.tensor): The training dataset.
+        test_data (torch.tensor): The test dataset.
+    """
     def __init__(self, args: TrainArgs, model: LanguageModel, train_data: torch.tensor, test_data: torch.tensor):
         self._max_iters = args.max_iters
         self._eval_iters = args.eval_iters
@@ -28,6 +37,14 @@ class ModelTrainer:
         self._optimizer = torch.optim.AdamW(model.encoder.parameters(), lr=args.learning_rate)
 
     def _get_batch(self, data: torch.tensor) -> Tuple[torch.tensor, torch.tensor]:
+        """
+        Returns a batch from a dataset.
+
+        Args:
+            data (torch.tensor): The dataset from which the batch should be created, i.e. train or test.
+        Returns:
+            Tuple[torch.tensor, torch.tensor]: Returns a tuple consisting of input and target values.
+        """
         assert len(data) - self._model.context_length >= 0, 'Length of data is shorter than context_length'
 
         idx = torch.randint(len(data) - self._model.context_length, (self._batch_size, ))
@@ -37,7 +54,13 @@ class ModelTrainer:
         return x, y
 
     @torch.no_grad()
-    def estimate_loss(self) -> Dict[int, torch.tensor]:
+    def _estimate_loss(self) -> Dict[int, torch.tensor]:
+        """
+        Estimates the loss of the model.
+
+        Returns:
+            Dict[int, torch.tensor]: Returns a dictionary containing the train and test loss of the model.
+        """
         out = {}
         self._model.encoder.eval()
         for index, dataset in enumerate([self._train_data, self._test_data]):
@@ -50,10 +73,13 @@ class ModelTrainer:
         self._model.encoder.train()
         return out
 
-    def train(self):
+    def train(self) -> None:
+        """
+        Trains the model on the given trainings dataset.
+        """
         for iter in range(self._max_iters):
             if iter % self._eval_interval == 0 or iter == self._max_iters -1 :
-                losses = self.estimate_loss()
+                losses = self._estimate_loss()
                 print(f"step {iter}: train loss {losses[0]:.4f}, test loss {losses[1]:.4f}")
 
             x_batch, y_batch = self._get_batch(self._train_data)

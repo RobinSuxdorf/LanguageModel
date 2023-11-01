@@ -1,0 +1,1 @@
+from .text_to_tensor import create_pipeline

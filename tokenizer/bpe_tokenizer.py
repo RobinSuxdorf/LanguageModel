@@ -22,9 +22,9 @@ class BytePairEncodingTokenizer(Tokenizer):
             num_merges (int): The number of BPE merges to perform during training.
         """
         super().__init__()
-        self.num_merges = num_merges
+        self._num_merges = num_merges
 
-    def get_vocab(self, corpus: List[str]) -> Dict[str, int]:
+    def _get_vocab(self, corpus: List[str]) -> Dict[str, int]:
         """
         Build the initial vocabulary from a given corpus.
 
@@ -43,7 +43,7 @@ class BytePairEncodingTokenizer(Tokenizer):
 
         return dict(vocab)
 
-    def get_pair_stats(self, vocab: Dict[str, int]) -> Dict[Tuple[str, str], int]:
+    def _get_pair_stats(self, vocab: Dict[str, int]) -> Dict[Tuple[str, str], int]:
         """
         Calculate statistics for pairs of tokens in the vocabulary.
 
@@ -64,7 +64,7 @@ class BytePairEncodingTokenizer(Tokenizer):
 
         return dict(pairs)
 
-    def merge_vocab(self, best_pair: Tuple[str, str], vocab_in: Dict[str, int]) -> Dict[str, int]:
+    def _merge_vocab(self, best_pair: Tuple[str, str], vocab_in: Dict[str, int]) -> Dict[str, int]:
         """
         Merge the vocabulary by replacing the best pair with a single token.
 
@@ -88,10 +88,10 @@ class BytePairEncodingTokenizer(Tokenizer):
         Args:
             corpus (List[str]): A list of input text documents.
         """
-        vocab = self.get_vocab(corpus)
+        vocab = self._get_vocab(corpus)
 
-        for i in range(self.num_merges):
-            pair_stats = self.get_pair_stats(vocab)
+        for i in range(self._num_merges):
+            pair_stats = self._get_pair_stats(vocab)
             if not pair_stats:
                 break
 
@@ -100,11 +100,11 @@ class BytePairEncodingTokenizer(Tokenizer):
             self.stoi[new_token] = i + self.vocab_size
             self.itos[i + self.vocab_size] = new_token
 
-            vocab = self.merge_vocab(best_pair, vocab)
+            vocab = self._merge_vocab(best_pair, vocab)
 
         self.vocab_size = len(self.stoi)
 
-    def create_new_word(self, word: List[str], pair_to_merge: Tuple[str, int]) -> List[str]:
+    def _create_new_word(self, word: List[str], pair_to_merge: Tuple[str, int]) -> List[str]:
         """
         Create a new word by merging a specific token pair.
 
@@ -147,6 +147,6 @@ class BytePairEncodingTokenizer(Tokenizer):
 
             pair_to_merge = bpe_code_pairs[0]
 
-            word = self.create_new_word(word, pair_to_merge)
+            word = self._create_new_word(word, pair_to_merge)
 
         return word
