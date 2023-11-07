@@ -1,5 +1,4 @@
 import tokenizer
-from typing import Dict, List, Tuple
 import re
 from collections import defaultdict
 
@@ -24,15 +23,15 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
         super().__init__()
         self._num_merges = num_merges
 
-    def _get_vocab(self, corpus: List[str]) -> Dict[str, int]:
+    def _get_vocab(self, corpus: list[str]) -> dict[str, int]:
         """
         Build the initial vocabulary from a given corpus.
 
         Args:
-            corpus (List[str]): A list of input text documents.
+            corpus (list[str]): A list of input text documents.
 
         Returns:
-            Dict[str, int]: A dictionary mapping tokenized words to their frequencies.
+            dict[str, int]: A dictionary mapping tokenized words to their frequencies.
         """
         vocab = defaultdict(int)
 
@@ -43,15 +42,15 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
 
         return dict(vocab)
 
-    def _get_pair_stats(self, vocab: Dict[str, int]) -> Dict[Tuple[str, str], int]:
+    def _get_pair_stats(self, vocab: dict[str, int]) -> dict[tuple[str, str], int]:
         """
         Calculate statistics for pairs of tokens in the vocabulary.
 
         Args:
-            vocab (Dict[str, int]): A dictionary mapping tokenized words to their frequencies.
+            vocab (dict[str, int]): A dictionary mapping tokenized words to their frequencies.
 
         Returns:
-            Dict[Tuple[str, str], int]: A dictionary mapping token pairs to their frequencies.
+            dict[tuple[str, str], int]: A dictionary mapping token pairs to their frequencies.
         """
         pairs = defaultdict(int)
         
@@ -64,16 +63,16 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
 
         return dict(pairs)
 
-    def _merge_vocab(self, best_pair: Tuple[str, str], vocab_in: Dict[str, int]) -> Dict[str, int]:
+    def _merge_vocab(self, best_pair: tuple[str, str], vocab_in: dict[str, int]) -> dict[str, int]:
         """
         Merge the vocabulary by replacing the best pair with a single token.
 
         Args:
-            best_pair (Tuple[str, str]): The token pair to merge.
-            vocab_in (Dict[str, int]): The input vocabulary.
+            best_pair (tuple[str, str]): The token pair to merge.
+            vocab_in (dict[str, int]): The input vocabulary.
 
         Returns:
-            Dict[str, int]: The updated vocabulary with merged tokens.
+            dict[str, int]: The updated vocabulary with merged tokens.
         """
         pattern = re.escape(' '.join(best_pair))
         replacement = ''.join(best_pair)
@@ -81,12 +80,12 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
         vocab_out = {re.sub(pattern, replacement, word_in): freq for word_in, freq in vocab_in.items()}
         return vocab_out
 
-    def fit(self, corpus: List[str]) -> None:
+    def fit(self, corpus: list[str]) -> None:
         """
         Train the Byte Pair Encoding tokenizer on a given corpus.
 
         Args:
-            corpus (List[str]): A list of input text documents.
+            corpus (list[str]): A list of input text documents.
         """
         vocab = self._get_vocab(corpus)
 
@@ -104,16 +103,16 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
 
         self.vocab_size = len(self.stoi)
 
-    def _create_new_word(self, word: List[str], pair_to_merge: Tuple[str, int]) -> List[str]:
+    def _create_new_word(self, word: list[str], pair_to_merge: tuple[str, int]) -> list[str]:
         """
         Create a new word by merging a specific token pair.
 
         Args:
-            word (List[str]): The list of tokens representing the current word.
-            pair_to_mrge (Tuple[str,int]): The character pair to merge.
+            word (list[str]): The list of tokens representing the current word.
+            pair_to_mrge (tuple[str,int]): The character pair to merge.
 
         Returns:
-            List[str]: The word with the specified pair merged.
+            list[str]: The word with the specified pair merged.
         """
         i = 0
         while i < len(word) - 1:
@@ -127,7 +126,7 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
 
         return word
 
-    def tokenize(self, text: str) -> List[str]:
+    def tokenize(self, text: str) -> list[str]:
         """
         Tokenize a given text using the trained Byte Pair Encoding tokenizer.
 
@@ -135,7 +134,7 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
             text (str): The input text to tokenize.
 
         Returns:
-            List[str]: A list of tokenized subwords.
+            list[str]: A list of tokenized subwords.
         """
         word = list(text)
 

@@ -1,4 +1,4 @@
-from typing import Callable, List, Tuple
+from typing import Callable
 
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
@@ -27,19 +27,19 @@ def create_pipeline(tokenizer: Tokenizer, train_size: float) -> Pipeline:
         ('train_test_split', FunctionTransformer(create_data_splitter(train_size)))
     ])
 
-def tokens_to_tensor(tokens: List[int]) -> torch.tensor:
+def tokens_to_tensor(tokens: list[int]) -> torch.tensor:
     """
     Transforms a list of tokens into a tensor.
     
     Args:
-        tokens (List[int]): A list containing numeric representations of the tokens.
+        tokens (list[int]): A list containing numeric representations of the tokens.
 
     Returns:
         torch.tensor: Returns a tensor containing the token encodings.
     """
     return torch.tensor(tokens, dtype=torch.long)
 
-def create_data_splitter(train_size: float) -> Callable[[torch.tensor], Tuple[torch.tensor, torch.tensor]]:
+def create_data_splitter(train_size: float) -> Callable[[torch.tensor], tuple[torch.tensor, torch.tensor]]:
     """
         Creates a function which splits the data with the given train_size.
 
@@ -47,9 +47,9 @@ def create_data_splitter(train_size: float) -> Callable[[torch.tensor], Tuple[to
             train_size (float): Represents the propotion of the dataset to include in the train data set. Should be a float between 0 and 1.
 
         Returns:
-            Callable[[torch.tensor], Tuple[torch.tensor, torch.tensor]]: Returns a function which splits the given data into two sets.
+            Callable[[torch.tensor], tuple[torch.tensor, torch.tensor]]: Returns a function which splits the given data into two sets.
     """
-    def split_data(data: torch.tensor) -> Tuple[torch.tensor, torch.tensor]:
+    def split_data(data: torch.tensor) -> tuple[torch.tensor, torch.tensor]:
         """
             Function that splits the given text into two sets.
 
@@ -57,7 +57,7 @@ def create_data_splitter(train_size: float) -> Callable[[torch.tensor], Tuple[to
                 data (torch.tensor): The data which should be split into two sets.
 
             Returns:
-                Tuple[torch.tensor, torch.tensor]: The splitted sets.
+                tuple[torch.tensor, torch.tensor]: The splitted sets.
         """
         n = int(train_size * len(data))
         return data[:n], data[n:]

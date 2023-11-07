@@ -1,5 +1,3 @@
-from typing import Dict, Tuple
-
 from dataclasses import dataclass
 
 import torch
@@ -36,14 +34,14 @@ class ModelTrainer:
         self._model = model
         self._optimizer = torch.optim.AdamW(model.encoder.parameters(), lr=args.learning_rate)
 
-    def _get_batch(self, data: torch.tensor) -> Tuple[torch.tensor, torch.tensor]:
+    def _get_batch(self, data: torch.tensor) -> tuple[torch.tensor, torch.tensor]:
         """
         Returns a batch from a dataset.
 
         Args:
             data (torch.tensor): The dataset from which the batch should be created, i.e. train or test.
         Returns:
-            Tuple[torch.tensor, torch.tensor]: Returns a tuple consisting of input and target values.
+            tuple[torch.tensor, torch.tensor]: Returns a tuple consisting of input and target values.
         """
         assert len(data) - self._model.context_length >= 0, 'Length of data is shorter than context_length'
 
@@ -54,12 +52,12 @@ class ModelTrainer:
         return x, y
 
     @torch.no_grad()
-    def _estimate_loss(self) -> Dict[int, torch.tensor]:
+    def _estimate_loss(self) -> dict[int, torch.tensor]:
         """
         Estimates the loss of the model.
 
         Returns:
-            Dict[int, torch.tensor]: Returns a dictionary containing the train and test loss of the model.
+            dict[int, torch.tensor]: Returns a dictionary containing the train and test loss of the model.
         """
         out = {}
         self._model.encoder.eval()
