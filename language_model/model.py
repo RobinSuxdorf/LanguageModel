@@ -13,7 +13,7 @@ class Encoder(nn.Module):
         num_heads: int, 
         forward_expansion: int, 
         dropout: float,
-        device: str
+        device: torch.device
     ):
         super().__init__()
         self.context_length = context_length

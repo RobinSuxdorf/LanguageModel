@@ -23,13 +23,13 @@ class LanguageModel():
 
     Args:
         tokenizer (Tokenizer): The tokenizer for encoding and decoding the text.
-        device (str): The device where the calculations will be done, i.e. CPU or CUDA.
+        device (torch.device): The device where the calculations will be done, i.e. CPU or CUDA.
         args (ModelArgs): The model hyperparameters.
     """
     def __init__(
         self,
         tokenizer: tokenizer.Tokenizer,
-        device: str,
+        device: torch.device,
         args: ModelArgs = ModelArgs()
     ):
         """
@@ -37,7 +37,7 @@ class LanguageModel():
 
         Args:
             tokenizer (Tokenizer): The tokenizer for encoding and decoding the text.
-            device (str): The device where the calculations will be done, i.e. CPU or CUDA.
+            device (torch.device): The device where the calculations will be done, i.e. CPU or CUDA.
             args (ModelArgs): The model hyperparameters.
         """
         self.tokenizer = tokenizer
