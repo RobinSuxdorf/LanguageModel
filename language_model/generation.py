@@ -23,13 +23,8 @@ class LanguageModel():
 
     Args:
         tokenizer (Tokenizer): The tokenizer for encoding and decoding the text.
-        embed_size (int): The dimension of the token embedding.
-        context_length (int): The amount of tokens the language model can consider for predicting the next token.
-        num_layers (int): The number of transformer blocks of the model.
-        num_heads (int): The number of AttentionHeads in each layer.
-        forward_expansion (int): The expansion factor for the linear layer at the end of the transformer block.
-        dropout (float): The dropout value for the layers.
         device (str): The device where the calculations will be done, i.e. CPU or CUDA.
+        args (ModelArgs): The model hyperparameters.
     """
     def __init__(
         self,
@@ -42,13 +37,8 @@ class LanguageModel():
 
         Args:
             tokenizer (Tokenizer): The tokenizer for encoding and decoding the text.
-            embed_size (int): The dimension of the token embedding.
-            context_length (int): The amount of tokens the language model can consider for predicting the next token.
-            num_layers (int): The number of transformer blocks of the model.
-            num_heads (int): The number of AttentionHeads in each layer.
-            forward_expansion (int): The expansion factor for the linear layer at the end of the transformer block.
-            dropout (float): The dropout value for the layers.
             device (str): The device where the calculations will be done, i.e. CPU or CUDA.
+            args (ModelArgs): The model hyperparameters.
         """
         self.tokenizer = tokenizer
         self.context_length = args.context_length

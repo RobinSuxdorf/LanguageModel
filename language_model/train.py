@@ -17,10 +17,10 @@ class ModelTrainer:
     Class for training language model on given datasets.
 
     Args:
-        args (TrainArgs): The training hyperparameters.
         model (LanguageModel): The language model which should be trained.
         train_data (torch.tensor): The training dataset.
         test_data (torch.tensor): The test dataset.
+        args (TrainArgs): The training hyperparameters.
     """
     def __init__(
         self, 
