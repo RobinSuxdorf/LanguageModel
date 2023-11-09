@@ -92,24 +92,36 @@ class LanguageModel():
         Args:
             path (str): The pathname where the model will be saved.
         """
-        with open(path, "wb") as file:
-            pickle.dump(self.__dict__, file)
+        torch.save({
+            "tokenizer": self.tokenizer,
+            "context_length": self.context_length,
+            "model_state_dict": self.encoder.state_dict()
+        }, path)
 
     @classmethod
-    def load(cls, path: str):
+    def load(cls, path: str, device: torch.device):
         """
         Load the model.
 
         Args:
             path (str): The pathname where the model is saved.
+            device (torch.device): The device on which the model will be loaded.
         """
         try:
-            with open(path, "rb") as file:
-                model = cls.__new__(cls)
-                model.__dict__ = pickle.load(file)
+            checkpoint = torch.load(path, map_location=device)
 
-                return model
+            model = cls.__new__(cls)
+            model.__init__(
+                tokenizer=checkpoint['tokenizer'],
+                device=device,
+                args=ModelArgs(context_length=checkpoint['context_length'])
+            )
+            model.encoder.load_state_dict(checkpoint['model_state_dict'])
+
+            return model
+
         except FileNotFoundError:
             print(f"File '{path}' not found.")
+            
         except EOFError:
             print(f"Error while reading '{path}'. File may be corrupted.")

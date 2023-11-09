@@ -92,7 +92,9 @@ class Tokenizer(ABC):
                 tokenizer = cls.__new__(cls)
                 tokenizer.__dict__ = pickle.load(file)
                 return tokenizer
+
         except FileNotFoundError:
             print(f"File '{path}' not found.")
+            
         except EOFError:
             print(f"Error while reading '{path}'. File may be corrupted.")
