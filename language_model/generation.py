@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import pickle
 
 import torch
@@ -5,6 +7,15 @@ import torch.nn as nn
 
 from tokenizer import tokenizer
 from language_model import model
+
+@dataclass
+class ModelArgs():
+    context_length: int = 256
+    embed_size: int = 512
+    num_layers: int = 6
+    num_heads: int = 8
+    forward_expansion: int = 4
+    dropout: float = 0.2
 
 class LanguageModel():
     """
@@ -23,13 +34,8 @@ class LanguageModel():
     def __init__(
         self,
         tokenizer: tokenizer.Tokenizer,
-        embed_size: int,
-        context_length: int,
-        num_layers: int,
-        num_heads: int,
-        forward_expansion: int,
-        dropout: float,
-        device: str
+        device: str,
+        args: ModelArgs = ModelArgs()
     ):
         """
         Initialize the language model.
@@ -45,17 +51,17 @@ class LanguageModel():
             device (str): The device where the calculations will be done, i.e. CPU or CUDA.
         """
         self.tokenizer = tokenizer
-        self.context_length = context_length
+        self.context_length = args.context_length
         self._device = device
 
         self.encoder = model.Encoder(
             tokenizer.vocab_size,
-            embed_size,
-            context_length,
-            num_layers,
-            num_heads,
-            forward_expansion,
-            dropout,
+            args.embed_size,
+            args.context_length,
+            args.num_layers,
+            args.num_heads,
+            args.forward_expansion,
+            args.dropout,
             device = device
         ).to(device)
 

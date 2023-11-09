@@ -9,7 +9,7 @@ class TrainArgs:
     max_iters: int = 250
     eval_iters: int = 5
     eval_interval: int = 10
-    learning_rate: int = 3e-4
+    learning_rate: float = 3e-4
     batch_size: int = 64
 
 class ModelTrainer:
@@ -22,7 +22,13 @@ class ModelTrainer:
         train_data (torch.tensor): The training dataset.
         test_data (torch.tensor): The test dataset.
     """
-    def __init__(self, args: TrainArgs, model: generation.LanguageModel, train_data: torch.tensor, test_data: torch.tensor):
+    def __init__(
+        self, 
+        model: generation.LanguageModel, 
+        train_data: torch.tensor, 
+        test_data: torch.tensor,
+        args: TrainArgs = TrainArgs()
+    ):
         self._max_iters = args.max_iters
         self._eval_iters = args.eval_iters
         self._eval_interval = args.eval_interval
