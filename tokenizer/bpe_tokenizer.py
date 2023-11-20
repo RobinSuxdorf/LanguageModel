@@ -87,6 +87,8 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
         Args:
             corpus (list[str]): A list of input text documents.
         """
+        current_vocab_size = len(self)
+
         vocab = self._get_vocab(corpus)
 
         for i in range(self._num_merges):
@@ -96,12 +98,10 @@ class BytePairEncodingTokenizer(tokenizer.Tokenizer):
 
             best_pair = max(pair_stats, key=pair_stats.get)
             new_token = best_pair[0] + best_pair[1]
-            self.stoi[new_token] = i + self.vocab_size
-            self.itos[i + self.vocab_size] = new_token
+            self.stoi[new_token] = i + current_vocab_size
+            self.itos[i + current_vocab_size] = new_token
 
             vocab = self._merge_vocab(best_pair, vocab)
-
-        self.vocab_size = len(self.stoi)
 
     def _create_new_word(self, word: list[str], pair_to_merge: tuple[str, int]) -> list[str]:
         """

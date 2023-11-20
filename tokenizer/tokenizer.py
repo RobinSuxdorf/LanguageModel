@@ -10,7 +10,6 @@ class Tokenizer(ABC):
     Attributes:
         stoi (dict[str, int]): A dictionary mapping tokens to their corresponding integer indices.
         itos (dict[int, str]): A dictionary mapping integer indices to their corresponding tokens.
-        vocab_size (int): The size of the vocabulary, i.e., the number of unique tokens.
     """
 
     def __init__(self):
@@ -19,7 +18,12 @@ class Tokenizer(ABC):
         """
         self.stoi: dict[str, int] = {char: i for i, char in enumerate(list(BASE_VOCAB))}
         self.itos: dict[int, str] = {i: char for i, char in enumerate(list(BASE_VOCAB))}
-        self.vocab_size = len(self.stoi)
+
+    def __len__(self):
+        """
+        Returns size of vocabulary.
+        """
+        return len(self.stoi)
 
     @abstractmethod
     def fit(self, corpus: list[str]) -> None:
