@@ -1,8 +1,8 @@
-import tokenizer
+import tokenizers
 import re
 from collections import defaultdict
 
-class BytePairEncodingTokenizer(tokenizer.Tokenizer):
+class BytePairEncodingTokenizer(tokenizers.Tokenizer):
     """
     Tokenizer using Byte Pair Encoding (BPE) algorithm.
 

@@ -6,7 +6,7 @@ from unidecode import unidecode
 
 import torch
 
-from tokenizer.tokenizer import Tokenizer
+from tokenizers.tokenizer import Tokenizer
 
 def create_pipeline(tokenizer: Tokenizer, train_size: float) -> Pipeline:
     """

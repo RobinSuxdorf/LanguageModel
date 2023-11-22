@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import pickle
 
-from tokenizer import special_tokens
+from tokenizers import special_tokens
 
 BASE_VOCAB = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\n'
 

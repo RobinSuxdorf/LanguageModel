@@ -1,6 +1,6 @@
-import tokenizer
+import tokenizers
 
-class CharacterTokenizer(tokenizer.Tokenizer):
+class CharacterTokenizer(tokenizers.Tokenizer):
     """
     Tokenizer that tokenizes input text into individual characters.
     """

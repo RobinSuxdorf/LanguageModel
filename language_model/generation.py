@@ -5,7 +5,7 @@ import pickle
 import torch
 import torch.nn as nn
 
-from tokenizer import tokenizer
+from tokenizers import tokenizer
 from language_model import model
 
 @dataclass
