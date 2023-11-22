@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import pickle
 
+from tokenizer import special_tokens
+
 BASE_VOCAB = ' !"#$%&\'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~\n'
 
 class Tokenizer(ABC):
@@ -16,8 +18,18 @@ class Tokenizer(ABC):
         """
         Initialize a Tokenizer instance with a base vocabulary.
         """
-        self.stoi: dict[str, int] = {char: i for i, char in enumerate(list(BASE_VOCAB))}
-        self.itos: dict[int, str] = {i: char for i, char in enumerate(list(BASE_VOCAB))}
+        self.stoi: dict[str, int] = {
+            special_tokens.SpecialTokens.PAD: 0,
+            special_tokens.SpecialTokens.SOS: 1,
+            special_tokens.SpecialTokens.EOS: 2
+        }
+
+        current_vocab_size = len(self.stoi)
+
+        for i, char in enumerate(list(BASE_VOCAB)):
+            self.stoi[char] = i + current_vocab_size
+
+        self.itos: dict[int, str] = {v: k for k, v in self.stoi.items()}
 
     def __len__(self):
         """
