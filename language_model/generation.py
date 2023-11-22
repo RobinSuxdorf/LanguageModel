@@ -45,13 +45,13 @@ class LanguageModel():
         self._device = device
 
         self.encoder = model.Encoder(
-            tokenizer.vocab_size,
-            args.embed_size,
-            args.context_length,
-            args.num_layers,
-            args.num_heads,
-            args.forward_expansion,
-            args.dropout,
+            vocab_size = len(tokenizer),
+            embed_size  = args.embed_size,
+            context_length = args.context_length,
+            num_layers = args.num_layers,
+            num_heads = args.num_heads,
+            forward_expansion = args.forward_expansion,
+            dropout = args.dropout,
             device = device
         ).to(device)
 
