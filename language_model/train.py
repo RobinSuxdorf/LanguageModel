@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 
 import torch
+from torch.utils.data import DataLoader
 
+from datasets import lm_dataset
 from language_model import generation
 
 @dataclass
@@ -18,15 +20,15 @@ class ModelTrainer:
 
     Args:
         model (LanguageModel): The language model which should be trained.
-        train_data (torch.tensor): The training dataset.
-        test_data (torch.tensor): The test dataset.
+        train_text (str): The training text.
+        test_text (str): The test text.
         args (TrainArgs): The training hyperparameters.
     """
     def __init__(
         self, 
         model: generation.LanguageModel, 
-        train_data: torch.tensor, 
-        test_data: torch.tensor,
+        train_text: str, 
+        test_text: str,
         args: TrainArgs = TrainArgs()
     ):
         self._max_iters = args.max_iters
@@ -34,28 +36,16 @@ class ModelTrainer:
         self._eval_interval = args.eval_interval
         self._batch_size = args.batch_size
 
-        self._train_data = train_data
-        self._test_data = test_data
+        train_data = lm_dataset.LMDataset(model.tokenizer, train_text, model.context_length)
+        train_data_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
+        self._train_data_iter = iter(train_data_loader)
+
+        test_data = lm_dataset.LMDataset(model.tokenizer, test_text, model.context_length)
+        test_data_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=True)
+        self._test_data_iter = iter(test_data_loader)
 
         self._model = model
         self._optimizer = torch.optim.AdamW(model.encoder.parameters(), lr=args.learning_rate)
-
-    def _get_batch(self, data: torch.tensor) -> tuple[torch.tensor, torch.tensor]:
-        """
-        Returns a batch from a dataset.
-
-        Args:
-            data (torch.tensor): The dataset from which the batch should be created, i.e. train or test.
-        Returns:
-            tuple[torch.tensor, torch.tensor]: Returns a tuple consisting of input and target values.
-        """
-        assert len(data) - self._model.context_length >= 0, 'Length of data is shorter than context_length'
-
-        idx = torch.randint(len(data) - self._model.context_length, (self._batch_size, ))
-        x = torch.stack([data[i:i + self._model.context_length] for i in idx])
-        y = torch.stack([data[i + 1:i + self._model.context_length + 1] for i in idx])
-        x, y = x.to(self._model._device), y.to(self._model._device)
-        return x, y
 
     @torch.no_grad()
     def _estimate_loss(self) -> dict[int, torch.tensor]:
@@ -67,10 +57,12 @@ class ModelTrainer:
         """
         out = {}
         self._model.encoder.eval()
-        for index, dataset in enumerate([self._train_data, self._test_data]):
+        for index, iter in enumerate([self._train_data_iter, self._test_data_iter]):
             losses = torch.zeros(self._eval_iters)
             for k in range(self._eval_iters):
-                x, y = self._get_batch(dataset)
+                x, y = next(iter)
+                x = x[0]
+                y = y[0]
                 logits, loss = self._model.encoder(x, y)
                 losses[k] = loss.item()
             out[index] = losses.mean()
@@ -86,7 +78,9 @@ class ModelTrainer:
                 losses = self._estimate_loss()
                 print(f"step {iter}: train loss {losses[0]:.4f}, test loss {losses[1]:.4f}")
 
-            x_batch, y_batch = self._get_batch(self._train_data)
+            x_batch, y_batch = next(self._train_data_iter)
+            x_batch = x_batch[0]
+            y_batch = y_batch[0]
 
             logits, loss = self._model.encoder(x_batch, y_batch)
             self._optimizer.zero_grad(set_to_none=True)

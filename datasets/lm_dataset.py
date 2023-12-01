@@ -7,6 +7,8 @@ from tokenizers import tokenizer
 
 # token count
 # special tokens
+# corpus
+# epochs
 
 class LMDataset(Dataset):
     def __init__(self, tokenizer: tokenizer.Tokenizer, text: str, context_length: int):
