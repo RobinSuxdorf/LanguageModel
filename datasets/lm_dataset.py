@@ -15,7 +15,7 @@ class LMDataset(Dataset):
         self._context_length = context_length
 
         unicode_text = unidecode(text)
-        tokenized_text = tokenizer.encode(unicode_text)
+        tokenized_text: list[int] = tokenizer.encode(unicode_text)
         self._data = torch.tensor(tokenized_text, dtype=torch.long)
 
         assert len(self._data) - context_length >= 0, 'Length of data is shorter than context length'
