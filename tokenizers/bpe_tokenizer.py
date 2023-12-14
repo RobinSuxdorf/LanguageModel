@@ -75,7 +75,7 @@ class BytePairEncodingTokenizer(tokenizers.Tokenizer):
             dict[str, int]: The updated vocabulary with merged tokens.
         """
         pattern = re.escape(' '.join(best_pair))
-        replacement = ''.join(best_pair)
+        replacement = re.escape(''.join(best_pair))
 
         vocab_out = {re.sub(pattern, replacement, word_in): freq for word_in, freq in vocab_in.items()}
         return vocab_out
