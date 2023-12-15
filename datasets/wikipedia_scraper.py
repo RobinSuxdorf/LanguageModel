@@ -1,5 +1,7 @@
 import random
 from concurrent.futures import ThreadPoolExecutor
+import re
+from unidecode import unidecode
 import wikipedia
 
 def _get_wikipedia_data(title: str) -> tuple[dict[str, str], list[str]]:
@@ -19,8 +21,8 @@ def _get_wikipedia_data(title: str) -> tuple[dict[str, str], list[str]]:
         page_links = page.links
 
         data = {
-            'title': page.title,
-            'summary': page.summary
+            'title': unidecode(page.title),
+            'summary': re.sub(r'\\', "", re.sub("  ", "", re.sub('\n', "", unidecode(page.summary))))
         }
 
         return data, page_links

@@ -59,10 +59,8 @@ class ModelTrainer:
         self._model.encoder.eval()
         for index, iter in enumerate([self._train_data_iter, self._test_data_iter]):
             losses = torch.zeros(self._eval_iters)
-            for k in range(self._eval_iters):
-                x, y = next(iter)
-                x = x[0]
-                y = y[0]
+            for k, (x, y) in enumerate(iter):
+
                 logits, loss = self._model.encoder(x, y)
                 losses[k] = loss.item()
             out[index] = losses.mean()
@@ -73,14 +71,10 @@ class ModelTrainer:
         """
         Trains the model on the given trainings dataset.
         """
-        for iter in range(self._max_iters):
+        for iter, (x_batch, y_batch) in enumerate(self._train_data_iter):
             if iter % self._eval_interval == 0 or iter == self._max_iters -1 :
                 losses = self._estimate_loss()
                 print(f"step {iter}: train loss {losses[0]:.4f}, test loss {losses[1]:.4f}")
-
-            x_batch, y_batch = next(self._train_data_iter)
-            x_batch = x_batch[0]
-            y_batch = y_batch[0]
 
             logits, loss = self._model.encoder(x_batch, y_batch)
             self._optimizer.zero_grad(set_to_none=True)

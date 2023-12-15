@@ -1,29 +1,39 @@
 import torch
 from torch.utils.data import Dataset
 
-from unidecode import unidecode
+from tokenizers import tokenizer, special_tokens
 
-from tokenizers import tokenizer
-
-# token count
-# special tokens
-# corpus
-# epochs
+# epochs -> visualization
+#     rewrite train.py
+# stop generation after SOS
+# notebook for creating dataset -> token count
+# move logic from __getiem__ to __init__ or save it directly in json
+#    can assert that all entries have length _context_length + 1
+# context_length as property of language model class
+# doc strings
+# printing of PAD tokens
 
 class LMDataset(Dataset):
-    def __init__(self, tokenizer: tokenizer.Tokenizer, text: str, context_length: int):
+    def __init__(self, tokenizer: tokenizer, corpus: list[list[int]], context_length: int):
+        self._tokenizer = tokenizer
         self._context_length = context_length
-
-        unicode_text = unidecode(text)
-        tokenized_text: list[int] = tokenizer.encode(unicode_text)
-        self._data = torch.tensor(tokenized_text, dtype=torch.long)
-
-        assert len(self._data) - context_length >= 0, 'Length of data is shorter than context length'
+        self._corpus = corpus
 
     def __len__(self):
-        return len(self._data) - self._context_length
+        return len(self._corpus)
 
     def __getitem__(self, idx: int):
-        x = [self._data[idx:idx + self._context_length]]
-        y = [self._data[idx + 1:idx + self._context_length + 1]]
+        encoded_text: list[int] = self._corpus[idx]
+        
+        for _ in range(self._context_length - len(encoded_text) - 1):
+            encoded_text.append(self._tokenizer.stoi[special_tokens.SpecialTokens.PAD])
+
+        encoded_text.insert(0, self._tokenizer.stoi[special_tokens.SpecialTokens.SOS])
+        encoded_text.append(self._tokenizer.stoi[special_tokens.SpecialTokens.EOS])
+
+        encoded_text = torch.tensor(encoded_text, dtype=torch.long)
+
+        x = encoded_text[:self._context_length]
+        y = encoded_text[1:self._context_length + 1]
+
         return x, y
