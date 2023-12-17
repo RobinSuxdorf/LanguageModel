@@ -11,9 +11,9 @@ from language_model import generation
 
 @dataclass
 class TrainArgs:
-    n_epochs: int = 8
+    n_epochs: int = 4
     learning_rate: float = 3e-4
-    batch_size: int = 64
+    batch_size: int = 32
     log_interval: int = 3
 
 class ModelTrainer:
@@ -103,7 +103,7 @@ class ModelTrainer:
 
             examples_seen += len(data)
 
-            if batch_idx % self._log_interval == 0:
+            if batch_idx % self._log_interval == 0 or examples_seen == len(self._train_loader.dataset):
                 self._train_losses.append(loss.item())
                 self._train_counter.append((batch_idx * self._batch_size) + (epoch - 1) * len(self._train_loader.dataset))
 

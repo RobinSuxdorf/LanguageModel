@@ -3,12 +3,12 @@ from dataclasses import dataclass
 import torch
 import torch.nn as nn
 
-from tokenizers import tokenizer
+from tokenizers import special_tokens, tokenizer
 from language_model import model
 
 @dataclass
 class ModelArgs():
-    context_length: int = 512
+    context_length: int = 256
     embed_size: int = 512
     num_layers: int = 6
     num_heads: int = 8
@@ -39,6 +39,12 @@ class LanguageModel():
             args (ModelArgs): The model hyperparameters.
         """
         self.tokenizer = tokenizer
+
+        self._excluded_tokens: list[int] = [
+            self.tokenizer.stoi[special_tokens.SpecialTokens.SOS],
+            self.tokenizer.stoi[special_tokens.SpecialTokens.PAD]
+        ]
+
         self.context_length = args.context_length
         self._device = device
 
@@ -75,6 +81,12 @@ class LanguageModel():
             logits = logits[:, -1, :]
 
             probs = nn.functional.softmax(logits, dim=-1)
+
+            # exclude specific tokens from the choice
+            for token_id in self._excluded_tokens:
+                probs[:, token_id] = 0.0
+
+            probs /= probs.sum(dim=-1, keepdim=True)
 
             idx_next = torch.multinomial(probs, num_samples=1)
 
