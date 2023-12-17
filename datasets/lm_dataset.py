@@ -3,8 +3,6 @@ from torch.utils.data import Dataset
 
 from tokenizers import tokenizer, special_tokens
 
-# epochs -> visualization
-#     rewrite train.py
 # stop generation after SOS
 # notebook for creating dataset -> token count
 # move logic from __getiem__ to __init__ or save it directly in json
@@ -12,6 +10,7 @@ from tokenizers import tokenizer, special_tokens
 # context_length as property of language model class
 # doc strings
 # printing of PAD tokens
+# estimated time
 
 class LMDataset(Dataset):
     def __init__(self, tokenizer: tokenizer, corpus: list[list[int]], context_length: int):

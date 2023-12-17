@@ -51,16 +51,17 @@ class Encoder(nn.Module):
         x = self.layer_norm(x) # (B, T, es)
         logits = self.linear_head(x) # (B, T, vs)
 
-        if targets is None:
-            loss = None
-        else:
-            B, T, C = logits.shape
+        return logits
+        # if targets is None:
+        #     loss = None
+        # else:
+        #     B, T, C = logits.shape
 
-            logits = logits.view(B * T, C) # (B * T, vs)
-            targets = targets.view(B * T) # (B * T)
-            loss = nn.functional.cross_entropy(logits, targets)
+        #     logits = logits.view(B * T, C) # (B * T, vs)
+        #     targets = targets.view(B * T) # (B * T)
+        #     loss = nn.functional.cross_entropy(logits, targets)
 
-        return logits, loss
+        # return logits, loss
 
 class TransformerBlock(nn.Module):
     def __init__(

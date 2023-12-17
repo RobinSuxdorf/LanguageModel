@@ -8,7 +8,7 @@ from language_model import model
 
 @dataclass
 class ModelArgs():
-    context_length: int = 256
+    context_length: int = 512
     embed_size: int = 512
     num_layers: int = 6
     num_heads: int = 8
@@ -70,7 +70,7 @@ class LanguageModel():
         for _ in range(max_new_tokens):
             idx_cond = context[:, -self.context_length:]
 
-            logits, _ = self.encoder(idx_cond)
+            logits = self.encoder(idx_cond)
 
             logits = logits[:, -1, :]
 
