@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import torch
 import torch.nn as nn
 
-from tokenizers import special_tokens, tokenizer
+from tokenizers import bpe_tokenizer, special_tokens, tokenizer
 from language_model import model
 
 @dataclass
@@ -26,8 +26,8 @@ class LanguageModel():
     """
     def __init__(
         self,
-        tokenizer: tokenizer.Tokenizer,
-        device: torch.device,
+        tokenizer: tokenizer.Tokenizer = bpe_tokenizer.BytePairEncodingTokenizer.read_pkl('./tokenizers/trained_tokenizers/bpe.pkl'),
+        device: torch.device = torch.device('cpu'),
         args: ModelArgs = ModelArgs()
     ):
         """
@@ -59,7 +59,7 @@ class LanguageModel():
             device = device
         ).to(device)
 
-    def predict(self, input_text: str, max_new_tokens: int) -> str:
+    def predict(self, input_text: str, max_new_tokens: int = 100) -> str:
         """
         Completes the input string based on that context.
 
@@ -89,6 +89,9 @@ class LanguageModel():
             probs /= probs.sum(dim=-1, keepdim=True)
 
             idx_next = torch.multinomial(probs, num_samples=1)
+
+            if idx_next.item() == self.tokenizer.stoi[special_tokens.SpecialTokens.EOS]:
+                break
 
             context = torch.cat((context, idx_next), dim=1)
 

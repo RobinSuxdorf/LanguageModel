@@ -11,7 +11,7 @@ from language_model import generation
 
 @dataclass
 class TrainArgs:
-    n_epochs: int = 4
+    n_epochs: int = 3
     learning_rate: float = 3e-4
     batch_size: int = 32
     log_interval: int = 3

@@ -3,9 +3,10 @@ from torch.utils.data import Dataset
 
 from tokenizers import tokenizer, special_tokens
 
-# stop generation after SOS
 # move logic from __getiem__ to __init__ or save it directly in json
+# improve dataset
 # estimated time
+# sanitize string
 
 class LMDataset(Dataset):
     """
