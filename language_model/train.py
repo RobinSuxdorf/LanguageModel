@@ -22,27 +22,26 @@ class ModelTrainer:
 
     Args:
         model (LanguageModel): The language model which should be trained.
-        train_text (str): The training text.
-        test_text (str): The test text.
+        train_text (list[str]): The training corpus.
+        test_text (list[str]): The test corpus.
         args (TrainArgs): The training hyperparameters.
     """
     def __init__(
         self, 
         model: generation.LanguageModel, 
-        train_text: str, 
-        test_text: str,
+        train_text: list[str], 
+        test_text: list[str],
         args: TrainArgs = TrainArgs()
     ):
         self._batch_size = args.batch_size
 
-
         self._n_epochs = args.n_epochs
         self._log_interval = args.log_interval
 
-        train_data = lm_dataset.LMDataset(model.tokenizer, train_text, model.context_length)
+        train_data = lm_dataset.LMDataset(train_text, model.tokenizer, model.context_length)
         self._train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
 
-        test_data = lm_dataset.LMDataset(model.tokenizer, test_text, model.context_length)
+        test_data = lm_dataset.LMDataset(test_text, model.tokenizer, model.context_length)
         self._test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=True)
 
         self._model = model
@@ -52,7 +51,7 @@ class ModelTrainer:
         self._train_losses: list[float] = []
         self._train_counter: list[int] = []
         self._test_losses: list[float] = []
-        self._test_counter: list[int] = [i * len(self._train_loader.dataset) for i in range(self._epochs + 1)]
+        self._test_counter: list[int] = [i * len(self._train_loader.dataset) for i in range(self._n_epochs + 1)]
 
 
     @torch.no_grad()
@@ -77,9 +76,6 @@ class ModelTrainer:
         self._test_losses.append(test_loss)
 
         print(f'Test loss: {test_loss}')
-
-
-
 
     def _train_epoch(self, epoch: int) -> None:
         """

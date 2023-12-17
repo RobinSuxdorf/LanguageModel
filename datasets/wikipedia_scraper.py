@@ -1,8 +1,25 @@
 import random
 from concurrent.futures import ThreadPoolExecutor
+import json
 import re
 from unidecode import unidecode
 import wikipedia
+
+def _clean_text(text: str) -> str:
+    """
+    Cleans text, e.g. removes line breaks, multiple whitespaces
+
+    Args:
+        text (str): The text to be cleaned.
+
+    Returns:
+        str: The cleaned text.
+    """
+    text = unidecode(text)
+    text = re.sub('\n', '', text)
+    text = re.sub('  ', '', text)
+    text = re.sub(r'\\', '', text)
+    return text
 
 def _get_wikipedia_data(title: str) -> tuple[dict[str, str], list[str]]:
     """
@@ -21,8 +38,8 @@ def _get_wikipedia_data(title: str) -> tuple[dict[str, str], list[str]]:
         page_links = page.links
 
         data = {
-            'title': unidecode(page.title),
-            'summary': re.sub(r'\\', "", re.sub("  ", "", re.sub('\n', "", unidecode(page.summary))))
+            'title': _clean_text(page.title),
+            'summary': _clean_text(page.summary)
         }
 
         return data, page_links
@@ -66,3 +83,11 @@ def scrape_wikipedia(start_page: str, n_pages: str, sample_size: int = 100) -> l
     data = list({page['title']: page for page in data}.values())
 
     return data
+
+if __name__ == '__main__':
+    data: list[dict[str, str]] = scrape_wikipedia('Deep Learning', 5, 2)
+
+    json_data = json.dumps(data)
+
+    with open('./datasets/data4.json', 'w') as f:
+        f.write(json_data)
