@@ -3,7 +3,6 @@ from torch.utils.data import Dataset
 
 from tokenizers import tokenizer, special_tokens
 
-# move logic from __getiem__ to __init__ or save it directly in json
 # improve dataset
 # estimated time
 class LMDataset(Dataset):
@@ -28,7 +27,22 @@ class LMDataset(Dataset):
         self._context_length = context_length
 
         tokenized_corpus: list[list[int]] = [tokenizer.encode(text) for text in corpus]
-        self._corpus: list[list[int]] = [text for text in tokenized_corpus if len(text) < context_length]
+        tokenized_corpus = [text for text in tokenized_corpus if len(text) < context_length]
+
+        self._corpus: list[list[int]] = []
+
+        for encoded_text in tokenized_corpus:
+            encoded_text_tensor = torch.zeros(self._context_length + 1, dtype=torch.long)
+
+            encoded_text_tensor[1:len(encoded_text) + 1] = torch.tensor(encoded_text, dtype=torch.long)
+
+            encoded_text_tensor[0] = self._tokenizer.stoi[special_tokens.SpecialTokens.SOS]
+            encoded_text_tensor[self._context_length] = self._tokenizer.stoi[special_tokens.SpecialTokens.EOS]
+
+            pad_tokens = [self._tokenizer.stoi[special_tokens.SpecialTokens.PAD] for _ in range(self._context_length - len(encoded_text) - 1)]
+            encoded_text_tensor[len(encoded_text) + 1:self._context_length] = torch.tensor(pad_tokens, dtype=torch.long)
+
+            self._corpus.append(encoded_text_tensor)
 
     def __len__(self):
         """
@@ -45,14 +59,6 @@ class LMDataset(Dataset):
             idx (int): The index of the example to be retrieved.
         """
         encoded_text: list[int] = self._corpus[idx]
-        
-        for _ in range(self._context_length - len(encoded_text) - 1):
-            encoded_text.append(self._tokenizer.stoi[special_tokens.SpecialTokens.PAD])
-
-        encoded_text.insert(0, self._tokenizer.stoi[special_tokens.SpecialTokens.SOS])
-        encoded_text.append(self._tokenizer.stoi[special_tokens.SpecialTokens.EOS])
-
-        encoded_text = torch.tensor(encoded_text, dtype=torch.long)
 
         x = encoded_text[:self._context_length]
         y = encoded_text[1:self._context_length + 1]
