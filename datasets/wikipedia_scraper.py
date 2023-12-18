@@ -7,7 +7,7 @@ import wikipedia
 
 def _clean_text(text: str) -> str:
     """
-    Cleans text, e.g. removes line breaks, multiple whitespaces
+    Cleans text by unidecoding, removing line breaks, and multiple whitespaces.
 
     Args:
         text (str): The text to be cleaned.
@@ -16,9 +16,9 @@ def _clean_text(text: str) -> str:
         str: The cleaned text.
     """
     text = unidecode(text)
-    text = re.sub('\n', '', text)
-    text = re.sub('  ', '', text)
-    text = re.sub(r'\\', '', text)
+    text = re.sub(r'[\n\t]', '', text)
+    text = re.sub(r'\s+', '', text)
+    text = re.sub(r'\\+', '', text)
     return text
 
 def _get_wikipedia_data(title: str) -> tuple[dict[str, str], list[str]]:

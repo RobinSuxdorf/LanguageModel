@@ -6,8 +6,6 @@ from tokenizers import tokenizer, special_tokens
 # move logic from __getiem__ to __init__ or save it directly in json
 # improve dataset
 # estimated time
-# sanitize string
-
 class LMDataset(Dataset):
     """
     Dataset for language model.
