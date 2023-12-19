@@ -3,8 +3,6 @@ from torch.utils.data import Dataset
 
 from tokenizers import tokenizer, special_tokens
 
-# improve dataset
-# estimated time
 class LMDataset(Dataset):
     """
     Dataset for language model.
