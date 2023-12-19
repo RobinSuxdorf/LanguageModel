@@ -85,9 +85,9 @@ def scrape_wikipedia(start_page: str, n_pages: str, sample_size: int = 100) -> l
     return data
 
 if __name__ == '__main__':
-    data: list[dict[str, str]] = scrape_wikipedia('Deep Learning', 5, 2)
+    data: list[dict[str, str]] = scrape_wikipedia('Deep Learning', 10000, 250)
 
     json_data = json.dumps(data)
 
-    with open('./datasets/data4.json', 'w') as f:
+    with open('./datasets/data.json', 'w') as f:
         f.write(json_data)
