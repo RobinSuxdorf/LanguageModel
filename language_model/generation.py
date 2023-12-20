@@ -1,3 +1,4 @@
+from typing import Self
 from dataclasses import dataclass
 
 import torch
@@ -29,7 +30,7 @@ class LanguageModel():
         tokenizer: tokenizer.Tokenizer = bpe_tokenizer.BytePairEncodingTokenizer.read_pkl('./tokenizers/trained_tokenizers/bpe.pkl'),
         device: torch.device = torch.device('cpu'),
         args: ModelArgs = ModelArgs()
-    ):
+    ) -> None:
         """
         Initialize the language model.
 
@@ -98,7 +99,7 @@ class LanguageModel():
         output = self.tokenizer.decode(context[0].tolist())
         return output
 
-    def save(self, path: str):
+    def save(self, path: str) -> None:
         """
         Save the model.
 
@@ -112,7 +113,7 @@ class LanguageModel():
         }, path)
 
     @classmethod
-    def load(cls, path: str, device: torch.device):
+    def load(cls, path: str, device: torch.device) -> Self:
         """
         Load the model.
 

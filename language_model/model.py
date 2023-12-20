@@ -14,7 +14,7 @@ class Encoder(nn.Module):
         forward_expansion: int, 
         dropout: float,
         device: torch.device
-    ):
+    ) -> None:
         super().__init__()
         self.context_length = context_length
         self._device = device
@@ -28,7 +28,7 @@ class Encoder(nn.Module):
 
         self.apply(self._init_weights)
 
-    def _init_weights(self, module):
+    def _init_weights(self, module) -> None:
         if isinstance(module, nn.Linear):
             torch.nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
@@ -39,8 +39,7 @@ class Encoder(nn.Module):
     def forward(
         self, 
         idx: torch.tensor, # (B, T)
-        targets: Optional[torch.tensor] = None # (B, T)
-    ):
+    ) -> torch.tensor:
         B, T = idx.shape
 
         token_embedding = self.token_embedding(idx) # (B, T, es)
@@ -52,16 +51,6 @@ class Encoder(nn.Module):
         logits = self.linear_head(x) # (B, T, vs)
 
         return logits
-        # if targets is None:
-        #     loss = None
-        # else:
-        #     B, T, C = logits.shape
-
-        #     logits = logits.view(B * T, C) # (B * T, vs)
-        #     targets = targets.view(B * T) # (B * T)
-        #     loss = nn.functional.cross_entropy(logits, targets)
-
-        # return logits, loss
 
 class TransformerBlock(nn.Module):
     def __init__(
@@ -71,7 +60,7 @@ class TransformerBlock(nn.Module):
         context_length: int, 
         forward_expansion: int, 
         dropout: float
-    ):
+    ) -> None:
         super().__init__()
         assert embed_size % num_heads == 0, 'embed_size not divisible by num_heads'
 
@@ -111,7 +100,7 @@ class MultiHeadAttention(nn.Module):
         embed_size: int, 
         context_length: int, 
         dropout: float
-    ):
+    ) -> None:
         super().__init__()
         self.heads = nn.ModuleList([
             AttentionHead(head_size, embed_size, context_length, dropout) for _ in range(num_heads)
@@ -135,7 +124,7 @@ class AttentionHead(nn.Module):
         embed_size: int, 
         context_length: int, 
         dropout: float
-    ):
+    ) -> None:
         super().__init__()
         self.key_proj = nn.Linear(embed_size, head_size, bias=False)
         self.query_proj = nn.Linear(embed_size, head_size, bias=False)

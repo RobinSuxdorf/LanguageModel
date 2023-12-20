@@ -1,3 +1,4 @@
+from typing import Self
 from abc import ABC, abstractmethod
 import pickle
 
@@ -14,7 +15,7 @@ class Tokenizer(ABC):
         itos (dict[int, str]): A dictionary mapping integer indices to their corresponding tokens.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Initialize a Tokenizer instance with a base vocabulary.
         """
@@ -31,7 +32,7 @@ class Tokenizer(ABC):
 
         self.itos: dict[int, str] = {v: k for k, v in self.stoi.items()}
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         Returns size of vocabulary.
         """
@@ -96,7 +97,7 @@ class Tokenizer(ABC):
             pickle.dump(self.__dict__, file)
 
     @classmethod
-    def read_pkl(cls, path: str):
+    def read_pkl(cls, path: str) -> Self:
         """
         Reads the tokenizer's state from a binary file.
 

@@ -32,7 +32,7 @@ class ModelTrainer:
         train_text: list[str], 
         test_text: list[str],
         args: TrainArgs = TrainArgs()
-    ):
+    ) -> None:
         self._batch_size = args.batch_size
 
         self._n_epochs = args.n_epochs

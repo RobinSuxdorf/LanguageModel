@@ -12,7 +12,7 @@ class LMDataset(Dataset):
         tokenizer (Tokenizer): Tokenizer for tokenizing the texts from the corpus.
         context_length (int): The context length of the langauge model.
     """
-    def __init__(self, corpus: list[str], tokenizer: tokenizer.Tokenizer, context_length: int):
+    def __init__(self, corpus: list[str], tokenizer: tokenizer.Tokenizer, context_length: int) -> None:
         """
         Initialize the dataset.
 
@@ -42,13 +42,13 @@ class LMDataset(Dataset):
 
             self._corpus.append(encoded_text_tensor)
 
-    def __len__(self):
+    def __len__(self)  -> int:
         """
         Returns the length of the dataset.
         """
         return len(self._corpus)
 
-    def __getitem__(self, idx: int):
+    def __getitem__(self, idx: int) -> tuple[list[int], list[int]]:
         """
         Returns the example at index idx. The token sequence will get start, end and padding tokens
         so that the sequence have the length context_length.
