@@ -9,7 +9,7 @@ from language_model import model
 
 @dataclass
 class ModelArgs():
-    context_length: int = 256
+    context_length: int = 128
     embed_size: int = 512
     num_layers: int = 6
     num_heads: int = 8
