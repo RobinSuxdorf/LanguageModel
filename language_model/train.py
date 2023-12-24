@@ -47,10 +47,10 @@ class ModelTrainer:
         train_data: list[dict[str, Any]] = corpus[:split_value]
         test_data: list[dict[str, Any]] = corpus[split_value:]
 
-        train_data = lm_dataset.LMDataset(train_data)
+        train_data = lm_dataset.LMDataset(train_data, model.device)
         self._train_loader = DataLoader(train_data, batch_size=args.batch_size, shuffle=True)
 
-        test_data = lm_dataset.LMDataset(test_data)
+        test_data = lm_dataset.LMDataset(test_data, model.device)
         self._test_loader = DataLoader(test_data, batch_size=args.batch_size, shuffle=True)
 
         self._model = model

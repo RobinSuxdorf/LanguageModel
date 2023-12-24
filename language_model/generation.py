@@ -47,7 +47,7 @@ class LanguageModel():
         ]
 
         self.context_length = args.context_length
-        self._device = device
+        self.device = device
 
         self.encoder = model.Encoder(
             vocab_size = len(tokenizer),
@@ -72,7 +72,7 @@ class LanguageModel():
             str: The completed string.
         """
 
-        context = torch.tensor(self.tokenizer.encode(input_text), dtype=torch.long).unsqueeze(0).to(self._device)
+        context = torch.tensor(self.tokenizer.encode(input_text), dtype=torch.long).unsqueeze(0).to(self.device)
 
         for _ in range(max_new_tokens):
             idx_cond = context[:, -self.context_length:]

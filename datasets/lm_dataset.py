@@ -8,15 +8,18 @@ class LMDataset(Dataset):
 
     Args:
         data (list[dict[str, Any]]): The corpus on which the language model will be trained on.
+        device (torch.device): The device where the calculations will be done, i.e. CPU or CUDA.
     """
-    def __init__(self, data: list[dict[str, Any]]) -> None:
+    def __init__(self, data: list[dict[str, Any]], device: torch.device) -> None:
         """
         Initialize the dataset.
 
         Args:
-            corpus (list[dict[str, Any]]): The corpus on which the language model will be trained on.
+            data (list[dict[str, Any]]): The corpus on which the language model will be trained on.
+            device (torch.device): The device where the calculations will be done, i.e. CPU or CUDA.
         """
         self._corpus: list[list[int]] = [text['encoded'] for text in data]
+        self._device = device
 
     def __len__(self)  -> int:
         """
@@ -34,7 +37,7 @@ class LMDataset(Dataset):
         """
         encoded_text: list[int] = self._corpus[idx]
 
-        x = torch.tensor(encoded_text[:-1], dtype=torch.long)
-        y = torch.tensor(encoded_text[1:], dtype=torch.long)
+        x = torch.tensor(encoded_text[:-1], dtype=torch.long).to(self._device)
+        y = torch.tensor(encoded_text[1:], dtype=torch.long).to(self._device)
 
         return x, y
