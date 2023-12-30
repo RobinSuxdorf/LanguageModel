@@ -17,7 +17,8 @@ from tokenizers import special_tokens
 class TrainArgs:
     n_epochs: int = 3
     learning_rate: float = 3e-4
-    batch_size: int = 32
+    batch_size: int = 16
+    n_accumulation_steps: int = 4
     log_interval: int = 3
     train_test_split_ratio: float = 0.9
 
@@ -40,6 +41,7 @@ class ModelTrainer:
 
         self._n_epochs = args.n_epochs
         self._log_interval = args.log_interval
+        self._n_accumulation_steps = args.n_accumulation_steps
 
         corpus = self._prepate_data(data, model)
 
@@ -125,6 +127,8 @@ class ModelTrainer:
         test_loss /= len(self._test_loader.dataset)
         self._test_losses.append(test_loss)
 
+        torch.cuda.empty_cache()
+
         print(f'Test loss: {test_loss}')
 
     def _train_epoch(self, epoch: int) -> None:
@@ -139,7 +143,6 @@ class ModelTrainer:
         examples_seen = 0
 
         for batch_idx, (data, targets) in enumerate(self._train_loader):
-            self._optimizer.zero_grad()
             output = self._model.encoder(data)
 
             B, T, C = output.shape
@@ -148,8 +151,13 @@ class ModelTrainer:
             targets = targets.view(B * T)
 
             loss = self._criterion(output, targets)
+            loss = loss / self._n_accumulation_steps
             loss.backward()
-            self._optimizer.step()
+
+            if ((batch_idx + 1) % self._n_accumulation_steps == 0) or (batch_idx + 1 == len(self._train_loader)):
+                self._optimizer.step()
+
+                self._optimizer.zero_grad()
 
             examples_seen += len(data)
 
