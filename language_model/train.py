@@ -15,7 +15,7 @@ from tokenizers import special_tokens
 
 @dataclass
 class TrainArgs:
-    n_epochs: int = 3
+    n_epochs: int = 20
     learning_rate: float = 3e-4
     batch_size: int = 16
     n_accumulation_steps: int = 4
